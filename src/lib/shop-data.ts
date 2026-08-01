@@ -19,7 +19,7 @@ export const defaultSettings: ShopSettings = {
 
 export const defaultSettingsWithAdmin: ShopSettingsWithAdmin = {
   ...defaultSettings,
-  adminPassword: 'artique123',
+  adminPassword: process.env.ADMIN_PASSWORD || 'artique123',
 };
 
 export const seedCategories: Category[] = [

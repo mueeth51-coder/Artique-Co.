@@ -106,34 +106,36 @@ export default function ShopHomePage() {
   return (
     <div className="space-y-8">
       <section className="overflow-hidden rounded-[2rem] border border-amber-200 bg-amber-50 p-6 shadow-sm sm:p-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="max-w-2xl">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-white px-3 py-1 text-sm font-medium text-amber-700">
+        <div className="grid gap-6 lg:grid-cols-[1.2fr_0.9fr] lg:items-center">
+          <div className="flex flex-col gap-4">
+            <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-white px-3 py-1 text-sm font-medium text-amber-700 w-fit">
               <Sparkles size={14} />
-              Handmade with love & intention
+              <span className="line-clamp-2">Handmade with love & intention</span>
             </div>
-            <h1 className="text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">Artique Co. is where thoughtful crafts meet personal gifting.</h1>
-            <p className="mt-4 text-lg text-slate-600">Discover one-of-a-kind pieces, custom notes, and easy WhatsApp ordering for your next special moment.</p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <a href="#shop" className="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white">Browse crafts</a>
-              <Link href="/about" className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700">Meet the story</Link>
+            <h1 className="text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl lg:text-4xl leading-tight">Artique Co. is where thoughtful crafts meet personal gifting.</h1>
+            <p className="text-base sm:text-lg text-slate-600">Discover one-of-a-kind pieces, custom notes, and easy WhatsApp ordering for your next special moment.</p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <a href="#shop" className="inline-flex items-center justify-center rounded-lg bg-slate-900 px-6 py-3 text-sm font-semibold text-white hover:bg-slate-800 transition">Browse crafts</a>
+              <Link href="/about" className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 hover:border-slate-400 transition">Meet the story</Link>
             </div>
           </div>
-          <div className="rounded-[1.5rem] border border-amber-100 bg-white p-4 shadow-sm">
-            <Image src="/hero-art.svg" alt="Artique Co. craft collection" width={640} height={420} className="h-56 w-full rounded-[1rem] object-cover" />
+          <div className="hidden lg:block rounded-2xl border border-amber-100 bg-white p-4 shadow-sm">
+            <Image src="/hero-art.svg" alt="Artique Co. craft collection" width={420} height={300} className="h-56 w-full rounded-lg object-cover" />
           </div>
         </div>
       </section>
 
       <section className="rounded-[1.5rem] border border-amber-100 bg-white p-4 shadow-sm sm:p-6">
-        <div className="flex flex-col gap-3 rounded-[1rem] bg-amber-50 p-4 text-sm font-medium text-amber-800 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            {settings.promoBannerImageUrl ? (
-              <Image src={settings.promoBannerImageUrl} alt="Promo banner" width={180} height={96} className="h-24 w-32 rounded-[0.9rem] object-cover" />
-            ) : null}
-            <span>{settings.promoBanner}</span>
+        <div className="flex flex-col gap-4 rounded-lg bg-amber-50 p-4 text-sm font-medium text-amber-800">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+              {settings.promoBannerImageUrl ? (
+                <Image src={settings.promoBannerImageUrl} alt="Promo banner" width={180} height={96} className="h-20 w-28 rounded-lg object-cover flex-shrink-0" />
+              ) : null}
+              <span className="leading-relaxed">{settings.promoBanner}</span>
+            </div>
+            <span className="font-semibold whitespace-nowrap">WhatsApp: {resolvedWhatsappNumber}</span>
           </div>
-          <span className="font-semibold">WhatsApp: {resolvedWhatsappNumber}</span>
         </div>
       </section>
 
@@ -146,8 +148,13 @@ export default function ShopHomePage() {
                 <p className="text-sm text-slate-500">Search, filter, and customize pieces for gifting and everyday style.</p>
               </div>
               <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2">
-                <Search size={16} className="text-slate-500" />
-                <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search products" className="w-48 bg-transparent text-sm outline-none" />
+                <Search size={16} className="text-slate-500 flex-shrink-0" />
+                <input 
+                  value={query} 
+                  onChange={(e) => setQuery(e.target.value)} 
+                  placeholder="Search products" 
+                  className="flex-1 min-w-0 bg-transparent text-sm outline-none" 
+                />
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -162,18 +169,29 @@ export default function ShopHomePage() {
 
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {filteredProducts.map((product: Product) => (
-              <div key={product.id} className="rounded-[1.25rem] border border-slate-200 bg-white p-4 shadow-sm">
-                <Image src={product.imageUrl} alt={product.name} width={420} height={300} className="h-44 w-full rounded-[1rem] object-cover" />
-                <div className="mt-4 flex items-center justify-between">
+              <div key={product.id} className="rounded-[1.25rem] border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md transition">
+                <Image 
+                  src={product.imageUrl} 
+                  alt={product.name} 
+                  width={420} 
+                  height={300} 
+                  className="h-40 sm:h-44 w-full rounded-lg object-cover" 
+                />
+                <div className="mt-4 flex flex-col gap-3">
                   <div>
-                    <h3 className="font-semibold text-slate-900">{product.name}</h3>
+                    <h3 className="font-semibold text-slate-900 line-clamp-2">{product.name}</h3>
                     <p className="text-sm text-slate-500">{product.category}</p>
                   </div>
-                  <span className="rounded-full bg-amber-50 px-3 py-1 text-sm font-semibold text-amber-700">{formatCurrency(product.price)}</span>
+                  <p className="text-sm text-slate-600 line-clamp-2">{product.description}</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="rounded-full bg-amber-50 px-3 py-1 text-sm font-semibold text-amber-700">{formatCurrency(product.price)}</span>
+                    <span className="text-sm font-medium text-slate-700">{getStockLabel(product)}</span>
+                  </div>
                 </div>
-                <p className="mt-3 text-sm text-slate-600">{product.description}</p>
-                <p className="mt-3 text-sm font-medium text-slate-700">{getStockLabel(product)}</p>
-                <Link href={`/shop/${product.id}`} className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300" >
+                <Link 
+                  href={`/shop/${product.id}`} 
+                  className="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-amber-500 px-4 py-3 text-sm font-semibold text-white hover:bg-amber-600 transition disabled:cursor-not-allowed disabled:bg-slate-300" 
+                >
                   View details
                 </Link>
               </div>
@@ -199,45 +217,80 @@ export default function ShopHomePage() {
       </div>
 
       {selectedProduct ? (
-        <div className="fixed inset-0 z-20 flex items-center justify-center bg-slate-950/60 p-4">
-          <div className="w-full max-w-lg rounded-[1.5rem] bg-white p-6 shadow-xl">
-            <div className="flex items-start justify-between">
+        <div className="fixed inset-0 z-20 flex items-end sm:items-center justify-center bg-slate-950/60 p-0 sm:p-4">
+          <div className="w-full max-w-lg rounded-t-[1.5rem] sm:rounded-[1.5rem] bg-white p-6 shadow-xl sm:max-h-[90vh] overflow-y-auto">
+            <div className="flex items-start justify-between mb-4">
               <div>
                 <h3 className="text-xl font-semibold">Customize {selectedProduct.name}</h3>
                 <p className="text-sm text-slate-500">Pick your color, size, and add a special note.</p>
               </div>
-              <button onClick={() => setSelectedProduct(null)} className="text-sm text-slate-500">Close</button>
+              <button 
+                onClick={() => setSelectedProduct(null)} 
+                className="text-lg font-semibold text-slate-500 hover:text-slate-700 ml-4 flex-shrink-0"
+              >
+                ✕
+              </button>
             </div>
-            <div className="mt-4 space-y-4">
+            <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-slate-700">Color</label>
-                <input value={selectedColor} onChange={(e) => setSelectedColor(e.target.value)} placeholder={selectedProduct.colorOptions.join(', ') || 'Enter a custom color'} className="mt-2 w-full rounded-[1rem] border border-slate-200 px-3 py-2 text-sm" />
+                <input 
+                  value={selectedColor} 
+                  onChange={(e) => setSelectedColor(e.target.value)} 
+                  placeholder={selectedProduct.colorOptions.join(', ') || 'Enter a custom color'} 
+                  className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/20" 
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-slate-700">Size</label>
-                <input value={selectedSize} onChange={(e) => setSelectedSize(e.target.value)} placeholder={selectedProduct.sizeOptions.join(', ') || 'Enter a custom size'} className="mt-2 w-full rounded-[1rem] border border-slate-200 px-3 py-2 text-sm" />
+                <input 
+                  value={selectedSize} 
+                  onChange={(e) => setSelectedSize(e.target.value)} 
+                  placeholder={selectedProduct.sizeOptions.join(', ') || 'Enter a custom size'} 
+                  className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/20" 
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-slate-700">Reference image URL</label>
-                <input value={customImageUrl} onChange={(e) => setCustomImageUrl(e.target.value)} placeholder="https://..." className="mt-2 w-full rounded-[1rem] border border-slate-200 px-3 py-2 text-sm" />
+                <input 
+                  value={customImageUrl} 
+                  onChange={(e) => setCustomImageUrl(e.target.value)} 
+                  placeholder="https://..." 
+                  className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/20" 
+                />
               </div>
               {selectedProduct.allowCustomText ? (
                 <div>
                   <label className="text-sm font-medium text-slate-700">Custom text</label>
-                  <textarea value={customText} onChange={(e) => setCustomText(e.target.value)} placeholder="Enter custom wording or initials" className="mt-2 min-h-20 w-full rounded-[1rem] border border-slate-200 px-3 py-2 text-sm" />
+                  <textarea 
+                    value={customText} 
+                    onChange={(e) => setCustomText(e.target.value)} 
+                    placeholder="Enter custom wording or initials" 
+                    className="mt-2 min-h-20 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/20" 
+                  />
                 </div>
               ) : null}
               <div>
                 <label className="text-sm font-medium text-slate-700">More details / special instructions</label>
-                <textarea value={customNotes} onChange={(e) => setCustomNotes(e.target.value)} placeholder="Add a custom message or engraving request" className="mt-2 min-h-24 w-full rounded-[1rem] border border-slate-200 px-3 py-2 text-sm" />
+                <textarea 
+                  value={customNotes} 
+                  onChange={(e) => setCustomNotes(e.target.value)} 
+                  placeholder="Add a custom message or engraving request" 
+                  className="mt-2 min-h-24 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/20" 
+                />
               </div>
             </div>
-            <div className="mt-6 flex items-center justify-between">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm text-slate-500">{getStockLabel(selectedProduct)}</p>
-                <p className="text-lg font-semibold">{formatCurrency(selectedProduct.price)}</p>
+                <p className="text-lg font-semibold text-slate-900">{formatCurrency(selectedProduct.price)}</p>
               </div>
-              <button onClick={addSelectedToCart} className="rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-white">Add to cart</button>
+              <button 
+                onClick={addSelectedToCart} 
+                className="w-full sm:w-auto rounded-lg bg-amber-500 px-6 py-3 text-sm font-semibold text-white hover:bg-amber-600 transition"
+              >
+                Add to cart
+              </button>
             </div>
           </div>
         </div>

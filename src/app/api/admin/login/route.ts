@@ -1,38 +1,38 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase/client';
 import { defaultSettingsWithAdmin } from '@/lib/shop-data';
+
+const ADMIN_TOKEN = 'artique-admin-verified';
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const password = body?.password;
+    
     if (!password) {
-      return NextResponse.json({ ok: false }, { status: 401 });
+      return NextResponse.json({ ok: false, error: 'Password required' }, { status: 400 });
     }
 
-    const fallbackPassword = defaultSettingsWithAdmin.adminPassword;
-    let passwordMatches = password === fallbackPassword;
-
-    if (supabase) {
-      const { data, error } = await supabase
-        .from('shop_settings')
-        .select('adminPassword')
-        .eq('id', 'artique-co')
-        .single();
-
-      if (!error && data?.adminPassword) {
-        passwordMatches = data.adminPassword === password;
-      }
+    // Get admin password from environment or use default
+    const adminPassword = process.env.ADMIN_PASSWORD || defaultSettingsWithAdmin.adminPassword;
+    
+    // Verify password
+    if (password !== adminPassword) {
+      return NextResponse.json({ ok: false, error: 'Invalid password' }, { status: 401 });
     }
 
-    if (!passwordMatches) {
-      return NextResponse.json({ ok: false }, { status: 401 });
-    }
-
+    // Password correct - set secure token in cookie
     const res = NextResponse.json({ ok: true });
-    res.cookies.set('artique_admin', password, { httpOnly: true, path: '/', maxAge: 60 * 60 * 24 * 7 });
+    res.cookies.set('artique_admin_token', ADMIN_TOKEN, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/',
+    });
+    
     return res;
-  } catch {
-    return NextResponse.json({ ok: false }, { status: 500 });
+  } catch (error) {
+    console.error('Login error:', error);
+    return NextResponse.json({ ok: false, error: 'Server error' }, { status: 500 });
   }
 }

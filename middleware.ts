@@ -1,23 +1,23 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { supabase } from '@/lib/supabase/client';
 
-export async function middleware(req: NextRequest) {
+export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Protect all /admin routes except /admin/login and API routes
+  // Protect all /admin routes except /admin/login
   if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login') && !pathname.startsWith('/api')) {
-    const cookie = req.cookies.get('artique_admin')?.value;
-    if (cookie && supabase) {
-      const { data, error } = await supabase.from('shop_settings').select('adminPassword').eq('id', 'artique-co').single();
-      if (!error && data && data.adminPassword === cookie) {
-        return NextResponse.next();
-      }
+    // Check for authentication token in cookie
+    const authToken = req.cookies.get('artique_admin_token')?.value;
+    
+    // If no token, redirect to login
+    if (!authToken) {
+      const url = req.nextUrl.clone();
+      url.pathname = '/admin/login';
+      return NextResponse.redirect(url);
     }
-
-    const url = req.nextUrl.clone();
-    url.pathname = '/admin/login';
-    return NextResponse.redirect(url);
+    
+    // Token exists, allow access
+    return NextResponse.next();
   }
 
   return NextResponse.next();

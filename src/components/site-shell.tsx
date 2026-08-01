@@ -6,6 +6,7 @@ import { Menu, ShoppingBag, Sparkles, MessageCircle, X } from 'lucide-react';
 import type { CartItem, Category, Order, Product, ShopSettings, ThemePalette } from '@/lib/types';
 import { buildCartItemKey, createId, createOrderId, defaultSettings, defaultSettingsWithAdmin, seedCategories, seedProducts } from '@/lib/shop-data';
 import { supabase } from '@/lib/supabase/client';
+import MobileNav from './mobile-nav';
 
 const STORAGE_KEYS = {
   settings: 'artique-settings',
@@ -92,7 +93,7 @@ export default function SiteShell({ children, adminMode = false }: { children: R
         const storedAdmin = window.localStorage.getItem(STORAGE_KEYS.admin);
         if (storedAdmin) {
           setAdminAuthenticated(JSON.parse(storedAdmin) as boolean);
-        } else if (document.cookie.split(';').some((entry) => entry.trim().startsWith('artique_admin='))) {
+        } else if (document.cookie.split(';').some((entry) => entry.trim().startsWith('artique_admin_token='))) {
           setAdminAuthenticated(true);
         }
 
@@ -275,6 +276,7 @@ export default function SiteShell({ children, adminMode = false }: { children: R
 
   const submitOrder = useCallback((customerName: string, address: string, phone: string, notes: string) => {
     if (!cart.length) return null;
+    
     const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const order: Order = {
       id: createOrderId(),
@@ -287,7 +289,10 @@ export default function SiteShell({ children, adminMode = false }: { children: R
       total,
     };
 
+    // 1. Update local state immediately (UI update)
     setOrders((prev) => [order, ...prev]);
+    
+    // 2. Update product stock locally
     setProducts((prev) => prev.map((product) => {
       const matchingItems = cart.filter((item) => item.productId === product.id);
       if (!matchingItems.length) return product;
@@ -296,22 +301,59 @@ export default function SiteShell({ children, adminMode = false }: { children: R
       return { ...product, stock: Math.max((product.stock ?? 0) - reduction, 0) };
     }));
 
+    // 3. Clear cart immediately
     clearCart();
 
+    // 4. Sync to Supabase with proper error handling
     if (supabase) {
-      void (async () => {
+      (async () => {
         try {
-          await supabase.from('orders').insert([{ ...order }]);
-          // update stocks
-          for (const item of cart) {
-            const { data: prod } = await supabase.from('products').select('*').eq('id', item.productId).single();
-            if (!prod) continue;
-            if (prod.unlimitedStock) continue;
-            const newStock = Math.max((prod.stock ?? 0) - item.quantity, 0);
-            await supabase.from('products').update({ stock: newStock }).eq('id', item.productId);
+          // First, save the order to Supabase
+          const { error: orderError } = await supabase
+            .from('orders')
+            .insert([{
+              id: order.id,
+              createdAt: order.createdAt,
+              customerName: order.customerName,
+              address: order.address,
+              phone: order.phone,
+              notes: order.notes,
+              items: order.items,
+              total: order.total,
+            }]);
+
+          if (orderError) {
+            console.error('Error saving order to Supabase:', orderError);
+            return;
           }
-        } catch (e) {
-          // ignore
+
+          // Then, update product stocks in Supabase
+          for (const item of cart) {
+            const { data: prod, error: fetchError } = await supabase
+              .from('products')
+              .select('stock, unlimitedStock')
+              .eq('id', item.productId)
+              .single();
+
+            if (fetchError || !prod) {
+              console.error('Error fetching product:', fetchError);
+              continue;
+            }
+
+            if (prod.unlimitedStock) continue;
+
+            const newStock = Math.max((prod.stock ?? 0) - item.quantity, 0);
+            const { error: updateError } = await supabase
+              .from('products')
+              .update({ stock: newStock })
+              .eq('id', item.productId);
+
+            if (updateError) {
+              console.error('Error updating product stock:', updateError);
+            }
+          }
+        } catch (error) {
+          console.error('Unexpected error during Supabase sync:', error);
         }
       })();
     }
@@ -369,7 +411,7 @@ export default function SiteShell({ children, adminMode = false }: { children: R
     <ShopContext.Provider value={contextValue}>
       <div className="min-h-screen bg-slate-50 text-slate-900" style={themeStyle}>
         {!adminMode ? (
-          <header className="border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur-sm">
+          <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur-sm">
             <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
               <Link href="/" className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-3xl text-white shadow-xl" style={{ backgroundColor: 'var(--accent)' }}>
@@ -458,6 +500,8 @@ export default function SiteShell({ children, adminMode = false }: { children: R
             Order on WhatsApp
           </a>
         ) : null}
+
+        {!adminMode ? <MobileNav /> : null}
       </div>
     </ShopContext.Provider>
   );

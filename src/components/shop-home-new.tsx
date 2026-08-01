@@ -90,8 +90,8 @@ export default function ShopHomePage() {
         </div>
       </section>
 
-      {/* Search & Filter Section */}
-      <section className="sticky top-14 z-20 bg-white border-b border-slate-200 px-4 py-4 shadow-sm">
+      {/* Search & Filter Section - Sticky */}
+      <section className="sticky top-0 z-30 bg-white border-b border-slate-200 px-4 py-4 shadow-sm">
         <div className="max-w-5xl mx-auto space-y-4">
           {/* Search Bar */}
           <div className="flex items-center gap-2 bg-slate-100 rounded-xl px-4 py-3 border border-slate-200 focus-within:ring-2 focus-within:ring-amber-500 focus-within:border-transparent transition">
@@ -156,7 +156,7 @@ export default function ShopHomePage() {
                 <div
                   key={product.id}
                   onClick={() => setSelectedProduct(product)}
-                  className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition cursor-pointer active:scale-95"
+                  className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition cursor-pointer active:scale-95 select-none"
                 >
                   {/* Product Image */}
                   <div className="relative bg-slate-100 aspect-square overflow-hidden">
@@ -227,7 +227,7 @@ export default function ShopHomePage() {
             </div>
 
             {/* Modal Content */}
-            <div className="px-4 sm:px-6 py-6 space-y-6">
+            <div className="px-4 sm:px-6 py-6 space-y-6 pb-28 sm:pb-8">
               {/* Product Image */}
               <div className="bg-slate-100 rounded-2xl aspect-square overflow-hidden">
                 <Image
@@ -260,20 +260,23 @@ export default function ShopHomePage() {
               {selectedProduct.colorOptions.length > 0 && (
                 <div>
                   <label className="block text-sm font-semibold text-slate-900 mb-3">
-                    Color
+                    Color {selectedColor && <span className="text-amber-600">- {selectedColor}</span>}
                   </label>
-                  <select
-                    value={selectedColor}
-                    onChange={(e) => setSelectedColor(e.target.value)}
-                    className="w-full px-4 py-3 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  >
-                    <option value="">Select a color</option>
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                     {selectedProduct.colorOptions.map((color) => (
-                      <option key={color} value={color}>
+                      <button
+                        key={color}
+                        onClick={() => setSelectedColor(color)}
+                        className={`px-4 py-3 rounded-lg font-semibold transition active:scale-95 ${
+                          selectedColor === color
+                            ? 'bg-slate-900 text-white'
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
+                      >
                         {color}
-                      </option>
+                      </button>
                     ))}
-                  </select>
+                  </div>
                 </div>
               )}
 
@@ -281,20 +284,23 @@ export default function ShopHomePage() {
               {selectedProduct.sizeOptions.length > 0 && (
                 <div>
                   <label className="block text-sm font-semibold text-slate-900 mb-3">
-                    Size
+                    Size {selectedSize && <span className="text-amber-600">- {selectedSize}</span>}
                   </label>
-                  <select
-                    value={selectedSize}
-                    onChange={(e) => setSelectedSize(e.target.value)}
-                    className="w-full px-4 py-3 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  >
-                    <option value="">Select a size</option>
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                     {selectedProduct.sizeOptions.map((size) => (
-                      <option key={size} value={size}>
+                      <button
+                        key={size}
+                        onClick={() => setSelectedSize(size)}
+                        className={`px-4 py-3 rounded-lg font-semibold transition active:scale-95 ${
+                          selectedSize === size
+                            ? 'bg-slate-900 text-white'
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
+                      >
                         {size}
-                      </option>
+                      </button>
                     ))}
-                  </select>
+                  </div>
                 </div>
               )}
 
@@ -367,7 +373,7 @@ export default function ShopHomePage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-3 pt-4">
+              <div className="flex gap-3 pt-4 fixed sm:relative bottom-0 left-0 right-0 sm:bottom-auto bg-white border-t sm:border-t-0 border-slate-200 p-4 sm:p-0 w-full sm:w-auto">
                 <button
                   onClick={() => setSelectedProduct(null)}
                   className="flex-1 border-2 border-slate-300 text-slate-900 font-semibold px-6 py-4 rounded-xl hover:bg-slate-50 transition active:scale-95"

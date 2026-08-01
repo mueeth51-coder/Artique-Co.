@@ -237,7 +237,7 @@ export default function CartPage() {
                 <div className="flex-1 min-w-0">
                   <h3 className="font-bold text-slate-900 truncate">{item.name}</h3>
                   <p className="text-sm text-slate-600">{item.color} • {item.size}</p>
-                  {item.customText && <p className="text-xs text-amber-700 mt-1">Custom: {item.customText}</p>}
+                  {item.customText && <p className="text-xs text-amber-700 mt-1">✏️ Custom: {item.customText}</p>}
                   <p className="font-bold text-amber-600 mt-2">{formatCurrency(item.price)}</p>
                 </div>
 
@@ -272,7 +272,7 @@ export default function CartPage() {
 
           {/* Order Form */}
           <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4">
-            <h2 className="text-xl font-bold text-slate-900 mb-6">Delivery Details</h2>
+            <h2 className="text-xl font-bold text-slate-900 mb-6">📋 Delivery Details</h2>
 
             <div>
               <label className="block text-sm font-semibold text-slate-900 mb-2">Full Name *</label>
@@ -326,7 +326,7 @@ export default function CartPage() {
           </div>
 
           {/* Order Summary & Checkout */}
-          <div className="bg-gradient-to-br from-amber-50 to-slate-50 border border-amber-200 rounded-2xl p-6 space-y-4 sticky bottom-20 md:bottom-0">
+          <div className="bg-gradient-to-br from-amber-50 to-slate-50 border border-amber-200 rounded-2xl p-6 space-y-4 fixed sm:relative bottom-20 md:bottom-0 left-0 right-0 sm:bottom-auto">
             <div className="space-y-2">
               <div className="flex justify-between text-slate-600">
                 <span>Subtotal</span>

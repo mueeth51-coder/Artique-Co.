@@ -2,36 +2,56 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Lock, AlertCircle } from 'lucide-react';
+import { Lock, AlertCircle, CheckCircle, Loader } from 'lucide-react';
 
 export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccess(false);
     
     try {
+      console.log('[Admin Login] Submitting login request...');
+      
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         body: JSON.stringify({ password }),
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Ensure cookies are sent and received
       });
       
+      console.log('[Admin Login] Response status:', res.status);
+      
       if (res.ok) {
-        // Login successful
+        // Login successful - show success message briefly
+        setSuccess(true);
+        setPassword('');
+        
+        // Small delay before redirect for better UX
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        console.log('[Admin Login] Redirecting to dashboard...');
+        
+        // Redirect to dashboard
         router.push('/admin/dashboard');
+        
+        // Also refresh to ensure middleware checks the new cookie
         router.refresh();
       } else {
-        setError('Invalid password. Please try again.');
+        const errorData = await res.json().catch(() => ({}));
+        setError(errorData.error || 'Invalid password. Please try again.');
+        console.log('[Admin Login] Login failed:', errorData);
       }
     } catch (err) {
       setError('Connection error. Please try again.');
-      console.error('Login error:', err);
+      console.error('[Admin Login] Error:', err);
     } finally {
       setLoading(false);
     }
@@ -61,29 +81,42 @@ export default function AdminLoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter admin password"
-              disabled={loading}
+              disabled={loading || success}
               className="w-full px-4 py-3 rounded-lg border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/20 disabled:bg-slate-50 disabled:text-slate-500 transition"
               autoComplete="off"
             />
           </div>
 
           {/* Error Message */}
-          {error && (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-3 flex gap-3">
+          {error && !success && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 flex gap-3 animate-in fade-in">
               <AlertCircle size={20} className="text-red-600 flex-shrink-0 mt-0.5" />
               <p className="text-sm text-red-800">{error}</p>
+            </div>
+          )}
+
+          {/* Success Message */}
+          {success && (
+            <div className="rounded-lg border border-green-200 bg-green-50 p-3 flex gap-3 animate-in fade-in">
+              <CheckCircle size={20} className="text-green-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-green-800">Login successful! Redirecting...</p>
             </div>
           )}
 
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={loading || !password.trim()}
+            disabled={loading || !password.trim() || success}
             className="w-full py-3 bg-slate-900 text-white font-semibold rounded-lg transition hover:bg-slate-800 disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {loading ? (
+            {success ? (
               <>
-                <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <CheckCircle size={20} />
+                Success!
+              </>
+            ) : loading ? (
+              <>
+                <Loader size={20} className="animate-spin" />
                 Verifying...
               </>
             ) : (

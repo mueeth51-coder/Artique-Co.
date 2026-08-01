@@ -19,10 +19,10 @@ export default function MobileNav() {
   const isActive = (path: string) => pathname === path;
 
   const navItems = [
-    { icon: Home, label: 'Home', href: '/' },
-    { icon: ShoppingBag, label: 'Shop', href: '/shop' },
-    { icon: ShoppingBag, label: 'Cart', href: '/cart', badge: cartItemCount },
-    { icon: User, label: adminAuthenticated ? 'Admin' : 'Account', href: adminAuthenticated ? '/admin/dashboard' : '/register' },
+    { icon: Home, label: 'Home', href: '/', testId: 'nav-home' },
+    { icon: Search, label: 'Search', href: '/shop', testId: 'nav-search' },
+    { icon: ShoppingBag, label: 'Cart', href: '/cart', badge: cartItemCount, testId: 'nav-cart' },
+    { icon: User, label: adminAuthenticated ? 'Admin' : 'Account', href: adminAuthenticated ? '/admin/dashboard' : '/register', testId: 'nav-account' },
   ];
 
   // Don't show on admin pages
@@ -34,7 +34,7 @@ export default function MobileNav() {
     <>
       {/* Mobile Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white border-t border-slate-200 shadow-2xl">
-        <div className="flex items-center justify-around h-20 px-2">
+        <div className="flex items-center justify-around h-20 px-2 safe-area-inset-bottom">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
@@ -42,7 +42,8 @@ export default function MobileNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition ${
+                data-testid={item.testId}
+                className={`flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition active:scale-95 touch-none ${
                   active
                     ? 'text-amber-600'
                     : 'text-slate-600 hover:text-slate-900'
@@ -51,7 +52,7 @@ export default function MobileNav() {
                 <div className="relative">
                   <Icon size={24} strokeWidth={1.5} />
                   {item.badge && item.badge > 0 && (
-                    <span className="absolute -top-2 -right-2 flex items-center justify-center h-5 min-w-5 bg-amber-500 text-white text-xs font-bold rounded-full">
+                    <span className="absolute -top-2 -right-2 flex items-center justify-center h-5 min-w-5 bg-amber-500 text-white text-xs font-bold rounded-full animate-pulse">
                       {item.badge > 99 ? '99+' : item.badge}
                     </span>
                   )}
@@ -63,7 +64,7 @@ export default function MobileNav() {
         </div>
       </nav>
 
-      {/* Spacer for bottom nav */}
+      {/* Spacer for bottom nav - ensures content doesn't hide behind fixed nav */}
       <div className="h-20 md:hidden" />
     </>
   );

@@ -363,6 +363,3 @@ export default function CartPage() {
     </div>
   );
 }
-    if (!order) {
-      setCheckoutError('Unable to place the order right now.');
-      return;
